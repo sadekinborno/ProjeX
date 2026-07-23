@@ -153,41 +153,26 @@ function updateStatsDisplay(
   completedTasks,
   overdueTasks
 ) {
-  // Update Total Projects
-  const totalProjectsElement = document.querySelector(
-    ".stat-card:nth-child(1) .text-2xl"
-  );
-  if (totalProjectsElement) {
-    totalProjectsElement.textContent = totalProjects;
-    animateNumber(totalProjectsElement, totalProjects);
+  // Helper to find an element by new ID first, then fall back to old Tailwind selector
+  function getStatEl(newId, nthChild) {
+    return (
+      document.getElementById(newId) ||
+      document.querySelector(`.stat-card:nth-child(${nthChild}) p`) ||
+      document.querySelector(`.stat-card:nth-child(${nthChild}) .text-2xl`)
+    );
   }
 
-  // Update Total Tasks
-  const totalTasksElement = document.querySelector(
-    ".stat-card:nth-child(2) .text-2xl"
-  );
-  if (totalTasksElement) {
-    totalTasksElement.textContent = totalTasks;
-    animateNumber(totalTasksElement, totalTasks);
-  }
+  const totalProjectsElement = getStatEl('stat-total-projects', 1);
+  if (totalProjectsElement) animateNumber(totalProjectsElement, totalProjects);
 
-  // Update Completed Tasks
-  const completedTasksElement = document.querySelector(
-    ".stat-card:nth-child(3) .text-2xl"
-  );
-  if (completedTasksElement) {
-    completedTasksElement.textContent = completedTasks;
-    animateNumber(completedTasksElement, completedTasks);
-  }
+  const totalTasksElement = getStatEl('stat-total-tasks', 2);
+  if (totalTasksElement) animateNumber(totalTasksElement, totalTasks);
 
-  // Update Overdue Tasks
-  const overdueTasksElement = document.querySelector(
-    ".stat-card:nth-child(4) .text-2xl"
-  );
-  if (overdueTasksElement) {
-    overdueTasksElement.textContent = overdueTasks;
-    animateNumber(overdueTasksElement, overdueTasks);
-  }
+  const completedTasksElement = getStatEl('stat-completed-tasks', 3);
+  if (completedTasksElement) animateNumber(completedTasksElement, completedTasks);
+
+  const overdueTasksElement = getStatEl('stat-overdue-tasks', 4);
+  if (overdueTasksElement) animateNumber(overdueTasksElement, overdueTasks);
 }
 
 /**

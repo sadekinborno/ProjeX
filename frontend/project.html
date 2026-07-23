@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./style/tailwind.css">
     <link rel="stylesheet" href="./style/style.css">
 
     <style>
@@ -173,7 +172,7 @@
                 <ul>
                     <li>
                         <a href="index.html">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                            <svg class="nav-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
                             Home
@@ -181,15 +180,15 @@
                     </li>
                     <li>
                         <a href="mytasks.html">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                            <svg class="nav-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                             </svg>
                             My Tasks
                         </a>
                     </li>
                     <li>
-                        <a href="#">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <a href="#" id="members-nav-link" class="members-nav-btn">
+                            <svg class="nav-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
                             Members
@@ -197,7 +196,7 @@
                     </li>
                     <li>
                         <a href="settings.html" id="settings-link">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                            <svg class="nav-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
@@ -210,56 +209,140 @@
 
         <!-- ═══ Main Content ═══ -->
         <main class="main-content" style="position:relative;z-index:1;">
-            <!-- Header -->
-            <header class="main-header">
-                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <!-- Header & Hero -->
+            <div class="project-details-hero">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem;">
                     <div>
-                        <h1 id="project-name-header">Loading Project...</h1>
-                        <p class="header-subtitle" style="display:flex;align-items:center;gap:0.5rem;margin-top:4px;">
+                        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.35rem;">
+                            <h1 id="project-name-header" style="font-size:1.6rem;font-weight:800;letter-spacing:-0.03em;color:#ffffff;">Loading Project...</h1>
                             <span class="project-status-badge">Active</span>
-                            <span>Manage tasks and collaborate with your team</span>
-                        </p>
+                        </div>
+                        <p class="header-subtitle" style="font-size:0.84rem;color:#a1a1aa;">Manage tasks, track progress, and collaborate seamlessly with your team.</p>
+                    </div>
+                    <a href="index.html" class="btn btn-secondary" style="flex-shrink:0;font-size:0.8rem;padding:0.5rem 1rem;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Dashboard
+                    </a>
+                </div>
+
+                <!-- Progress Tracker -->
+                <div style="background:rgba(24,24,27,0.5);border:1px solid rgba(255,255,255,0.06);border-radius:var(--r-md);padding:0.85rem 1.15rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;font-weight:600;color:#fafafa;">
+                        <span style="display:flex;align-items:center;gap:0.4rem;">
+                            <svg width="14" height="14" fill="none" stroke="#10b981" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Project Completion
+                        </span>
+                        <span id="project-progress-pct" style="color:#34d399;font-weight:700;">0%</span>
+                    </div>
+                    <div class="project-progress-bar-wrap">
+                        <div id="project-progress-fill" class="project-progress-fill"></div>
                     </div>
                 </div>
-                <a href="index.html" class="btn btn-secondary" style="flex-shrink:0;">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Dashboard
-                </a>
-            </header>
+            </div>
 
             <!-- Content Grid -->
-            <div class="project-grid-layout">
+            <div class="project-grid-layout" style="padding-top:0;">
                 <!-- Left Column -->
                 <div class="left-col">
-                    <!-- Overview -->
+                    <!-- Overview Metrics -->
+                    <div class="pcard" style="padding:1.25rem 1.5rem;">
+                        <div class="pcard-header" style="margin-bottom:1rem;">
+                            <h2 class="pcard-title">
+                                <svg width="18" height="18" fill="none" stroke="#3b82f6" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Overview Metrics
+                            </h2>
+                        </div>
+                        <div class="pdetail-metrics-grid">
+                            <div class="pdetail-metric-card">
+                                <div class="pdetail-metric-icon blue">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="pdetail-metric-val" id="total-tasks">0</div>
+                                    <div class="pdetail-metric-lbl">Total Tasks</div>
+                                </div>
+                            </div>
+                            <div class="pdetail-metric-card">
+                                <div class="pdetail-metric-icon amber">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="pdetail-metric-val" id="inprogress-tasks">0</div>
+                                    <div class="pdetail-metric-lbl">In Progress</div>
+                                </div>
+                            </div>
+                            <div class="pdetail-metric-card">
+                                <div class="pdetail-metric-icon emerald">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="pdetail-metric-val" id="completed-tasks">0</div>
+                                    <div class="pdetail-metric-lbl">Completed</div>
+                                </div>
+                            </div>
+                            <div class="pdetail-metric-card">
+                                <div class="pdetail-metric-icon purple">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="pdetail-metric-val" id="total-members">0</div>
+                                    <div class="pdetail-metric-lbl">Team Members</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tasks Management Hub -->
                     <div class="pcard">
                         <div class="pcard-header">
                             <h2 class="pcard-title">
-                                <svg width="18" height="18" fill="none" stroke="#6366f1" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                <svg width="18" height="18" fill="none" stroke="#10b981" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                                 </svg>
-                                Project Overview
+                                Project Tasks
                             </h2>
+                            <button id="new-task-btn" class="btn btn-primary" style="font-size:0.78rem;padding:0.45rem 0.875rem;">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                New Task
+                            </button>
                         </div>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
-                            <div class="overview-stat">
-                                <div class="overview-stat-num" id="total-tasks" style="color:#06b6d4;">0</div>
-                                <div class="overview-stat-label">Total Tasks</div>
+
+                        <!-- Task Search & Filters Toolbar -->
+                        <div class="task-controls-bar">
+                            <div class="task-filter-bar">
+                                <button class="task-filter-btn filter-btn active" data-filter="all">All</button>
+                                <button class="task-filter-btn filter-btn" data-filter="pending">To Do</button>
+                                <button class="task-filter-btn filter-btn" data-filter="in-progress">In Progress</button>
+                                <button class="task-filter-btn filter-btn" data-filter="completed">Completed</button>
                             </div>
-                            <div class="overview-stat">
-                                <div class="overview-stat-num" id="completed-tasks" style="color:#10b981;">0</div>
-                                <div class="overview-stat-label">Completed</div>
-                            </div>
-                            <div class="overview-stat">
-                                <div class="overview-stat-num" id="total-members" style="color:#8b5cf6;">0</div>
-                                <div class="overview-stat-label">Team Members</div>
+                            <div class="task-search-wrap">
+                                <svg class="task-search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <input type="text" id="task-search-input" class="task-search-input" placeholder="Search tasks or assignees...">
                             </div>
                         </div>
+
+                        <ul id="task-list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.85rem;"></ul>
                     </div>
 
-                    <!-- Members -->
+                    <!-- Team Members Section -->
                     <div class="pcard">
                         <div class="pcard-header">
                             <h2 class="pcard-title">
@@ -268,7 +351,7 @@
                                 </svg>
                                 Team Members
                             </h2>
-                            <button id="add-member-btn" class="btn btn-primary" style="font-size:0.78rem;padding:0.45rem 0.875rem;">
+                            <button id="add-member-btn" class="btn btn-secondary" style="font-size:0.78rem;padding:0.45rem 0.875rem;">
                                 <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                                 </svg>
@@ -276,34 +359,6 @@
                             </button>
                         </div>
                         <div id="member-list" class="member-grid"></div>
-                    </div>
-
-                    <!-- Tasks -->
-                    <div class="pcard">
-                        <div class="pcard-header">
-                            <h2 class="pcard-title">
-                                <svg width="18" height="18" fill="none" stroke="#10b981" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                                </svg>
-                                Tasks
-                            </h2>
-                            <button id="new-task-btn" class="btn btn-success" style="font-size:0.78rem;padding:0.45rem 0.875rem;">
-                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                New Task
-                            </button>
-                        </div>
-
-                        <!-- Filters -->
-                        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;">
-                            <button class="filter-btn active" data-filter="all">All Tasks</button>
-                            <button class="filter-btn" data-filter="pending">Pending</button>
-                            <button class="filter-btn" data-filter="in-progress">In Progress</button>
-                            <button class="filter-btn" data-filter="completed">Completed</button>
-                        </div>
-
-                        <ul id="task-list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.75rem;"></ul>
                     </div>
                 </div>
 
@@ -377,17 +432,29 @@
     <div id="add-member-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="add-member-title">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="add-member-title">Add Team Member</h2>
+                <h2 id="add-member-title">Team Members</h2>
                 <span class="close-btn member-close" role="button" aria-label="Close">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="add-member-form" novalidate>
+                <div id="modal-project-select-wrap" style="margin-bottom: 1rem; display: none;">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-2); margin-bottom: 0.35rem; display: block;">Select Project</label>
+                    <select id="modal-project-select" class="form-control" style="width:100%; background: var(--bg-surface, #18181b); border: 1px solid var(--border, #27272a); color: var(--text-1, #fafafa); padding: 0.5rem; border-radius: var(--r-m, 0.5rem);"></select>
+                </div>
+                <form id="add-member-form" style="margin-bottom: 1.25rem;" novalidate>
                     <div class="form-group">
-                        <label for="member-username">Username</label>
-                        <input type="text" id="member-username" placeholder="Enter exact username" required>
+                        <label for="member-username">Add Member by Username</label>
+                        <div style="display:flex; gap: 0.5rem;">
+                            <input type="text" id="member-username" placeholder="Enter exact username" required style="flex:1;">
+                            <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Add Member</button>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Add Member</button>
                 </form>
+                <div class="modal-members-section">
+                    <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--text-2, #a1a1aa); margin-bottom: 0.75rem;">Current Team Members</h4>
+                    <ul id="modal-member-list" class="item-list" style="max-height: 220px; overflow-y: auto;">
+                        <li style="color:var(--text-3, #71717a); font-size:0.78rem;">Loading members...</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

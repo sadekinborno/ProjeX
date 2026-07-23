@@ -11,42 +11,92 @@ document.addEventListener("DOMContentLoaded", () => {
 function initializeProjectPage() {
   fetchProjectDetails();
   setupFilterButtons();
+  setupSearchInput();
 }
 
 async function fetchProjectDetails() {
-  // Get the project ID from the URL query string
-  const projectId = new URLSearchParams(window.location.search).get("id");
+  // Get project ID from URL query string or localStorage
+  let projectId = new URLSearchParams(window.location.search).get("id");
   if (!projectId) {
-    window.location.href = "index.html"; // Redirect if no ID is found
-    return;
+    projectId = localStorage.getItem("selectedProjectId");
   }
 
   const authToken = localStorage.getItem("authToken");
 
-  try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/api/projects/${projectId}/`,
-      {
-        headers: { Authorization: `Token ${authToken}` },
+  if (projectId && authToken) {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/projects/${projectId}/`,
+        {
+          headers: { Authorization: `Token ${authToken}` },
+        }
+      );
+
+      if (response.ok) {
+        const project = await response.json();
+        displayProjectDetails(project);
+        window.currentProject = project;
+
+        // Initialize chat system for this project
+        if (typeof window.initializeChatForProject === "function") {
+          window.initializeChatForProject(projectId);
+        }
+        return;
       }
-    );
-
-    if (!response.ok) throw new Error("Failed to fetch project details.");
-
-    const project = await response.json();
-    displayProjectDetails(project);
-
-    // Store project globally for filtering
-    window.currentProject = project;
-
-    // Initialize chat system for this project
-    if (typeof window.initializeChatForProject === "function") {
-      window.initializeChatForProject(projectId);
+    } catch (error) {
+      console.warn("Failed to fetch project details via API ID:", error);
     }
-  } catch (error) {
-    console.error(error);
-    alert(error.message);
   }
+
+  // Fallback: If no specific project ID or fetch failed, try loading user's project list
+  if (authToken) {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/projects/", {
+        headers: { Authorization: `Token ${authToken}` },
+      });
+
+      if (response.ok) {
+        const projects = await response.json();
+        if (projects && projects.length > 0) {
+          const firstProject = projects[0];
+          localStorage.setItem("selectedProjectId", firstProject.id);
+          localStorage.setItem("selectedProjectName", firstProject.name);
+
+          // Fetch complete details for the first project
+          const detailResp = await fetch(
+            `http://127.0.0.1:8000/api/projects/${firstProject.id}/`,
+            {
+              headers: { Authorization: `Token ${authToken}` },
+            }
+          );
+
+          if (detailResp.ok) {
+            const projectDetail = await detailResp.json();
+            displayProjectDetails(projectDetail);
+            window.currentProject = projectDetail;
+            if (typeof window.initializeChatForProject === "function") {
+              window.initializeChatForProject(firstProject.id);
+            }
+            return;
+          } else {
+            displayProjectDetails(firstProject);
+            window.currentProject = firstProject;
+            return;
+          }
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to fetch projects list fallback:", error);
+    }
+  }
+
+  // Final graceful fallback if unauthenticated or offline
+  const cachedName = localStorage.getItem("selectedProjectName") || "ProjeX";
+  displayProjectDetails({
+    name: cachedName,
+    members: [],
+    tasks: [],
+  });
 }
 
 function displayProjectDetails(project) {
@@ -59,106 +109,82 @@ function displayProjectDetails(project) {
   // Store members for later use in task creation
   window.currentProjectMembers = project.members;
 
-  // Update Project Overview Stats
+  // Calculate Project Overview Stats
   const totalTasks = project.tasks.length;
   const completedTasks = project.tasks.filter(
-    (task) => task.status === "Done" // Fixed: Database uses "Done" not "Completed"
+    (task) => task.status === "Done"
+  ).length;
+  const inProgressTasks = project.tasks.filter(
+    (task) => task.status === "In Progress"
   ).length;
   const totalMembers = project.members.length;
 
+  // Completion Progress Bar
+  const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const pctEl = document.getElementById("project-progress-pct");
+  const fillEl = document.getElementById("project-progress-fill");
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  if (fillEl) fillEl.style.width = `${pct}%`;
+
   // Animate numbers
   animateNumber("total-tasks", 0, totalTasks);
+  animateNumber("inprogress-tasks", 0, inProgressTasks);
   animateNumber("completed-tasks", 0, completedTasks);
   animateNumber("total-members", 0, totalMembers);
 
-  // Display members and tasks with modern UI
+  // Display members and tasks with modern dark UI
   displayTeamMembers(project.members);
   displayTasks(project.tasks);
 }
 
 function displayTeamMembers(members) {
   const memberList = document.getElementById("member-list");
+  if (!memberList) return;
   memberList.innerHTML = ""; // Clear list
 
   if (members.length === 0) {
     memberList.innerHTML = `
-      <div class="col-span-2 text-center py-12 text-gray-500">
-        <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 2rem 1rem; color: #a1a1aa;">
+        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" style="margin: 0 auto 0.5rem auto; display: block; color: #71717a;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
-        <p class="font-medium">No team members yet</p>
-        <p class="text-sm mt-1">Add members to start collaborating</p>
+        <p style="font-weight:600;font-size:0.875rem;color:#fafafa;">No team members yet</p>
+        <p style="font-size:0.75rem;color:#71717a;margin-top:2px;">Click "Add Member" above to invite teammates.</p>
       </div>
     `;
     return;
   }
 
+  const avatarGradients = [
+    "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+    "linear-gradient(135deg, #10b981, #047857)",
+    "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+    "linear-gradient(135deg, #ec4899, #be185d)",
+    "linear-gradient(135deg, #f59e0b, #b45309)",
+  ];
+
   members.forEach((member, index) => {
     const memberCard = document.createElement("div");
-    memberCard.className =
-      "member-card group relative bg-white rounded-lg p-4 border border-gray-200 hover:border-blue-400 transition-all duration-200 cursor-pointer";
+    memberCard.className = "pdetail-member-card";
 
-    const roleColors = {
-      Admin: {
-        bg: "bg-purple-100",
-        text: "text-purple-800",
-        border: "border-purple-300",
-      },
-      Member: {
-        bg: "bg-blue-100",
-        text: "text-blue-800",
-        border: "border-blue-300",
-      },
-      Viewer: {
-        bg: "bg-gray-100",
-        text: "text-gray-800",
-        border: "border-gray-300",
-      },
-    };
-
-    const roleConfig = roleColors[member.role] || roleColors["Member"];
-
-    // Generate avatar with first letter of username
-    const firstLetter = member.username.charAt(0).toUpperCase();
-    const avatarColors = [
-      "from-blue-500 to-blue-600",
-      "from-green-500 to-green-600",
-      "from-purple-500 to-purple-600",
-      "from-pink-500 to-pink-600",
-      "from-indigo-500 to-indigo-600",
-      "from-red-500 to-red-600",
-      "from-yellow-500 to-yellow-600",
-      "from-teal-500 to-teal-600",
-    ];
-    const avatarGradient = avatarColors[index % avatarColors.length];
+    const roleClass = (member.role || "member").toLowerCase();
+    const firstLetter = member.username ? member.username.charAt(0).toUpperCase() : "?";
+    const gradient = avatarGradients[index % avatarGradients.length];
 
     memberCard.innerHTML = `
-      <div class="flex items-center gap-4">
-        <div class="relative">
-          <div class="bg-gradient-to-br ${avatarGradient} w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md transition-transform duration-200 group-hover:scale-105">
-            ${firstLetter}
-          </div>
-          <!-- Online status indicator -->
-          <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+      <div class="member-avatar-circle" style="background: ${gradient};">
+        ${firstLetter}
+        <div class="member-online-dot"></div>
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="font-weight: 700; font-size: 0.875rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          ${member.username}
         </div>
-        
-        <div class="flex-1 min-w-0">
-          <h3 class="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors duration-200">
-            ${member.username}
-          </h3>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-              roleConfig.bg
-            } ${roleConfig.text} ${roleConfig.border}">
-              ${getRoleIcon(member.role)} ${member.role}
-            </span>
-          </div>
+        <div style="margin-top: 0.25rem;">
+          <span class="member-role-badge ${roleClass}">
+            ${getRoleIcon(member.role)} ${member.role || 'Member'}
+          </span>
         </div>
-        
-        <!-- Hover arrow -->
-        <svg class="w-5 h-5 text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-blue-600 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-        </svg>
       </div>
     `;
 
@@ -166,76 +192,72 @@ function displayTeamMembers(members) {
   });
 }
 
-function displayTasks(tasks, filter = "all") {
+function displayTasks(tasks, filter = "all", searchQuery = "") {
   const taskList = document.getElementById("task-list");
+  if (!taskList) return;
   taskList.innerHTML = ""; // Clear list
 
-  // Filter tasks based on selected filter
+  // Filter tasks based on selected filter tab
   let filteredTasks = tasks;
   if (filter !== "all") {
     const filterMap = {
-      pending: "To Do", // Fixed: Database uses "To Do"
+      pending: "To Do",
       "in-progress": "In Progress",
-      completed: "Done", // Fixed: Database uses "Done"
+      completed: "Done",
     };
-    filteredTasks = tasks.filter((task) => task.status === filterMap[filter]);
+    const targetStatus = filterMap[filter] || filter;
+    filteredTasks = tasks.filter((task) => task.status === targetStatus);
+  }
+
+  // Filter tasks by search query if present
+  if (searchQuery && searchQuery.trim() !== "") {
+    const query = searchQuery.trim().toLowerCase();
+    filteredTasks = filteredTasks.filter((task) => {
+      const matchTitle = task.title && task.title.toLowerCase().includes(query);
+      const matchDesc = task.description && task.description.toLowerCase().includes(query);
+      const matchAssignee = task.assignees && task.assignees.some(a => (a.username || a).toLowerCase().includes(query));
+      return matchTitle || matchDesc || matchAssignee;
+    });
   }
 
   if (filteredTasks.length === 0) {
     taskList.innerHTML = `
-      <li class="text-center py-12 text-gray-500">
-        <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      <li style="text-align:center;padding:2.5rem 1rem;color:#a1a1aa;background:rgba(24,24,27,0.5);border:1px solid rgba(255,255,255,0.06);border-radius:var(--r-md);">
+        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" style="margin: 0 auto 0.5rem auto; display: block; color: #71717a;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
         </svg>
-        <p class="font-medium">${
-          filter === "all"
+        <p style="font-weight:600;font-size:0.9rem;color:#fafafa;">${
+          filter === "all" && !searchQuery
             ? "No tasks in this project yet"
-            : "No " + filter + " tasks"
+            : "No matching tasks found"
         }</p>
-        <p class="text-sm mt-1">Create a new task to get started</p>
+        <p style="font-size:0.75rem;color:#71717a;margin-top:4px;">Click "New Task" to create a task for your team.</p>
       </li>
     `;
     return;
   }
 
-  filteredTasks.forEach((task, index) => {
+  filteredTasks.forEach((task) => {
     const li = document.createElement("li");
-    li.className =
-      "task-card relative bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-400 transition-all duration-200 cursor-pointer";
 
-    const statusConfig = {
-      "To Do": {
-        // Fixed: Match database status
-        bg: "bg-yellow-50",
-        text: "text-yellow-800",
-        border: "border-yellow-300",
-        icon: "⏳",
-      },
-      "In Progress": {
-        bg: "bg-blue-50",
-        text: "text-blue-800",
-        border: "border-blue-300",
-        icon: "🔄",
-      },
-      Done: {
-        // Fixed: Match database status
-        bg: "bg-green-50",
-        text: "text-green-800",
-        border: "border-green-300",
-        icon: "✓",
-      },
-      Blocked: {
-        bg: "bg-red-50",
-        text: "text-red-800",
-        border: "border-red-300",
-        icon: "🚫",
-      },
-    };
+    let statusClass = "status-todo";
+    let statusPillStyle = "background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);";
+    let statusIcon = `<span style="width:6px;height:6px;border-radius:50%;background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></span>`;
 
-    const status = statusConfig[task.status] || statusConfig["To Do"]; // Fixed: Default to "To Do"
+    if (task.status === "In Progress") {
+      statusClass = "status-progress";
+      statusPillStyle = "background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);";
+      statusIcon = `<span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></span>`;
+    } else if (task.status === "Done") {
+      statusClass = "status-done";
+      statusPillStyle = "background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);";
+      statusIcon = `<span style="width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;"></span>`;
+    }
+
+    li.className = `pdetail-task-card ${statusClass}`;
 
     // Format due date
-    const dueDate = task.due_date
+    const dueDateFormatted = task.due_date
       ? new Date(task.due_date).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
@@ -246,90 +268,70 @@ function displayTasks(tasks, filter = "all") {
     const isOverdue =
       task.due_date &&
       new Date(task.due_date) < new Date() &&
-      task.status !== "Done"; // Fixed: Database uses "Done"
+      task.status !== "Done";
 
-    // Get priority badge if exists
+    // Priority configuration
     const priorityConfig = {
       high: {
-        bg: "bg-red-100",
-        text: "text-red-700",
-        icon: "🔴",
-        label: "High",
-      }, // Fixed: Database uses lowercase
+        style: "background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3);",
+        label: "High Priority",
+      },
       medium: {
-        bg: "bg-orange-100",
-        text: "text-orange-700",
-        icon: "🟡",
-        label: "Medium",
+        style: "background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);",
+        label: "Medium Priority",
       },
       low: {
-        bg: "bg-green-100",
-        text: "text-green-700",
-        icon: "🟢",
-        label: "Low",
+        style: "background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);",
+        label: "Low Priority",
       },
     };
-    const priority = task.priority ? priorityConfig[task.priority] : null;
+    const priority = task.priority ? priorityConfig[task.priority.toLowerCase()] : null;
+
+    // Assignee names
+    const assigneeCount = task.assignees ? task.assignees.length : 0;
 
     li.innerHTML = `
-      <div class="flex items-start justify-between gap-3 mb-3">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap mb-2">
-            <h3 class="font-semibold text-gray-900 text-base">
+      <div style="display:flex;align-items:flex-start;justify-space-between;gap:1rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.35rem;">
+            <h3 style="font-weight:700;font-size:0.95rem;color:#ffffff;line-height:1.3;">
               ${task.title}
             </h3>
             ${
               priority
-                ? `
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${priority.bg} ${priority.text}">
-                ${priority.icon} ${priority.label}
-              </span>
-            `
+                ? `<span style="display:inline-flex;align-items:center;padding:0.15rem 0.5rem;border-radius:99px;font-size:0.68rem;font-weight:700;${priority.style}">${priority.label}</span>`
                 : ""
             }
           </div>
           ${
             task.description
-              ? `
-            <p class="text-sm text-gray-600 mb-3 line-clamp-2">
-              ${task.description}
-            </p>
-          `
+              ? `<p style="font-size:0.8rem;color:#a1a1aa;margin:0 0 0.5rem 0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${task.description}</p>`
               : ""
           }
         </div>
-        
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-          status.bg
-        } ${status.text} ${status.border}">
-          <span>${status.icon}</span>
+        <span style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.25rem 0.65rem;border-radius:99px;font-size:0.72rem;font-weight:700;letter-spacing:0.02em;white-space:nowrap;${statusPillStyle}">
+          ${statusIcon}
           ${task.status}
         </span>
       </div>
-      
-      <div class="flex items-center gap-6 text-sm text-gray-600">
-        <div class="flex items-center gap-2 ${
-          isOverdue ? "text-red-600 font-medium" : ""
-        }">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-top:0.5rem;border-top:1px solid rgba(255,255,255,0.05);font-size:0.75rem;color:#a1a1aa;">
+        <div style="display:flex;align-items:center;gap:0.35rem; ${isOverdue ? 'color:#f87171;font-weight:600;' : ''}">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
-          <span class="text-xs">${dueDate}${
-      isOverdue ? " (Overdue!)" : ""
-    }</span>
+          <span>${dueDateFormatted}${isOverdue ? " (Overdue)" : ""}</span>
         </div>
-        
+
         ${
-          task.assignees && task.assignees.length > 0
-            ? `
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-            <span class="text-xs font-medium">${task.assignees.length} assigned</span>
-          </div>
-        `
-            : ""
+          assigneeCount > 0
+            ? `<div style="display:flex;align-items:center;gap:0.35rem;color:#38bdf8;">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span style="font-weight:600;">${assigneeCount} ${assigneeCount === 1 ? 'assignee' : 'assignees'}</span>
+              </div>`
+            : `<span style="color:#71717a;">Unassigned</span>`
         }
       </div>
     `;
@@ -338,27 +340,38 @@ function displayTasks(tasks, filter = "all") {
   });
 }
 
+let projectDetailsActiveFilter = "all";
+let projectDetailsSearchQuery = "";
+
 function setupFilterButtons() {
   const filterButtons = document.querySelectorAll(".filter-btn");
 
   filterButtons.forEach((button) => {
     button.addEventListener("click", () => {
       // Remove active class from all buttons
-      filterButtons.forEach((btn) => {
-        btn.classList.remove("active", "bg-blue-600", "text-white");
-        btn.classList.add("bg-gray-100", "text-gray-600");
-      });
+      filterButtons.forEach((btn) => btn.classList.remove("active"));
 
       // Add active class to clicked button
-      button.classList.remove("bg-gray-100", "text-gray-600");
-      button.classList.add("active", "bg-blue-600", "text-white");
+      button.classList.add("active");
 
       // Filter tasks
-      const filter = button.getAttribute("data-filter");
+      projectDetailsActiveFilter = button.getAttribute("data-filter") || "all";
       if (window.currentProject) {
-        displayTasks(window.currentProject.tasks, filter);
+        displayTasks(window.currentProject.tasks, projectDetailsActiveFilter, projectDetailsSearchQuery);
       }
     });
+  });
+}
+
+function setupSearchInput() {
+  const searchInput = document.getElementById("task-search-input");
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", (e) => {
+    projectDetailsSearchQuery = e.target.value;
+    if (window.currentProject) {
+      displayTasks(window.currentProject.tasks, projectDetailsActiveFilter, projectDetailsSearchQuery);
+    }
   });
 }
 
@@ -366,13 +379,14 @@ function getRoleIcon(role) {
   const icons = {
     Admin: "👑",
     Member: "👤",
+    Designer: "🎨",
     Viewer: "👁️",
   };
   return icons[role] || "👤";
 }
 
 // Helper function to animate numbers
-function animateNumber(elementId, start, end, duration = 1000) {
+function animateNumber(elementId, start, end, duration = 800) {
   const element = document.getElementById(elementId);
   if (!element) return;
 
@@ -392,3 +406,4 @@ function animateNumber(elementId, start, end, duration = 1000) {
     element.textContent = Math.round(current);
   }, 16);
 }
+
