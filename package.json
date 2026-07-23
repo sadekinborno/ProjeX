@@ -1,0 +1,16 @@
+{
+  "name": "projex",
+  "version": "1.0.0",
+  "description": "A full-stack project management application built with Django REST Framework backend and vanilla JavaScript frontend.",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "npx tailwindcss -i ./frontend/style/input.css -o ./frontend/style/tailwind.css",
+    "dev": "npx tailwindcss -i ./frontend/style/input.css -o ./frontend/style/tailwind.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

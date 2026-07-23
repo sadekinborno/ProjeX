@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details - ProjeX</title>
+    <meta name="description" content="Manage your project tasks and collaborate with team members in ProjeX.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style/tailwind.css">
+    <link rel="stylesheet" href="./style/style.css">
+
+    <style>
+        /* Project header gradient badge */
+        .project-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 99px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            background: rgba(16,185,129,0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16,185,129,0.25);
+        }
+
+        .project-status-badge::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 6px #10b981;
+        }
+
+        /* Overview stat blocks */
+        .overview-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-align: center;
+            transition: all var(--transition-normal);
+        }
+        .overview-stat:hover {
+            border-color: var(--border-bright);
+            transform: translateY(-2px);
+        }
+        .overview-stat-num {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+        .overview-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.375rem;
+            font-weight: 500;
+        }
+
+        /* Layout */
+        .project-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.5rem;
+            padding: 1.5rem 2rem 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .project-grid-layout { grid-template-columns: 1fr; }
+        }
+
+        .left-col { display: flex; flex-direction: column; gap: 1.5rem; }
+
+        /* Card */
+        .pcard {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: border-color var(--transition-normal);
+        }
+
+        .pcard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .pcard-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Member grid */
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        /* Avatar colors */
+        .av-0 { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+        .av-1 { background: linear-gradient(135deg, #06b6d4, #6366f1); }
+        .av-2 { background: linear-gradient(135deg, #10b981, #06b6d4); }
+        .av-3 { background: linear-gradient(135deg, #f59e0b, #f43f5e); }
+        .av-4 { background: linear-gradient(135deg, #f43f5e, #8b5cf6); }
+
+        /* Priority indicator */
+        .priority-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+        .priority-dot.high   { background: #f43f5e; box-shadow: 0 0 6px #f43f5e; }
+        .priority-dot.medium { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+        .priority-dot.low    { background: #10b981; box-shadow: 0 0 6px #10b981; }
+
+        /* Chat sticky */
+        .chat-sticky {
+            position: sticky;
+            top: 5rem;
+            height: calc(100vh - 7rem);
+        }
+
+        .chat-wrap {
+            height: 100%;
+        }
+
+        /* Modal display fix */
+        #new-task-modal.flex,
+        #add-member-modal.flex { display: flex !important; }
+    </style>
+</head>
+
+<body>
+    <div class="bg-orbs" aria-hidden="true">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+    </div>
+
+    <div class="app-layout">
+        <!-- ═══ Sidebar ═══ -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                            <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/>
+                        </svg>
+                    </div>
+                    <span class="sidebar-logo-text">ProjeX</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <p class="nav-title">Selected Project</p>
+                <div id="selected-project-name" class="workspace-info">No project selected</div>
+
+                <p class="nav-title">Menu</p>
+                <ul>
+                    <li>
+                        <a href="index.html">
+                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                            </svg>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mytasks.html">
+                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                            My Tasks
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Members
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" id="settings-link">
+                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- ═══ Main Content ═══ -->
+        <main class="main-content" style="position:relative;z-index:1;">
+            <!-- Header -->
+            <header class="main-header">
+                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                    <div>
+                        <h1 id="project-name-header">Loading Project...</h1>
+                        <p class="header-subtitle" style="display:flex;align-items:center;gap:0.5rem;margin-top:4px;">
+                            <span class="project-status-badge">Active</span>
+                            <span>Manage tasks and collaborate with your team</span>
+                        </p>
+                    </div>
+                </div>
+                <a href="index.html" class="btn btn-secondary" style="flex-shrink:0;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Dashboard
+                </a>
+            </header>
+
+            <!-- Content Grid -->
+            <div class="project-grid-layout">
+                <!-- Left Column -->
+                <div class="left-col">
+                    <!-- Overview -->
+                    <div class="pcard">
+                        <div class="pcard-header">
+                            <h2 class="pcard-title">
+                                <svg width="18" height="18" fill="none" stroke="#6366f1" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Project Overview
+                            </h2>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+                            <div class="overview-stat">
+                                <div class="overview-stat-num" id="total-tasks" style="color:#06b6d4;">0</div>
+                                <div class="overview-stat-label">Total Tasks</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="overview-stat-num" id="completed-tasks" style="color:#10b981;">0</div>
+                                <div class="overview-stat-label">Completed</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="overview-stat-num" id="total-members" style="color:#8b5cf6;">0</div>
+                                <div class="overview-stat-label">Team Members</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Members -->
+                    <div class="pcard">
+                        <div class="pcard-header">
+                            <h2 class="pcard-title">
+                                <svg width="18" height="18" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Team Members
+                            </h2>
+                            <button id="add-member-btn" class="btn btn-primary" style="font-size:0.78rem;padding:0.45rem 0.875rem;">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Add Member
+                            </button>
+                        </div>
+                        <div id="member-list" class="member-grid"></div>
+                    </div>
+
+                    <!-- Tasks -->
+                    <div class="pcard">
+                        <div class="pcard-header">
+                            <h2 class="pcard-title">
+                                <svg width="18" height="18" fill="none" stroke="#10b981" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                </svg>
+                                Tasks
+                            </h2>
+                            <button id="new-task-btn" class="btn btn-success" style="font-size:0.78rem;padding:0.45rem 0.875rem;">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                New Task
+                            </button>
+                        </div>
+
+                        <!-- Filters -->
+                        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;">
+                            <button class="filter-btn active" data-filter="all">All Tasks</button>
+                            <button class="filter-btn" data-filter="pending">Pending</button>
+                            <button class="filter-btn" data-filter="in-progress">In Progress</button>
+                            <button class="filter-btn" data-filter="completed">Completed</button>
+                        </div>
+
+                        <ul id="task-list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.75rem;"></ul>
+                    </div>
+                </div>
+
+                <!-- Right Column — Chat -->
+                <div class="chat-sticky">
+                    <div class="chat-wrap">
+                        <div class="chat-header">
+                            <div class="chat-online-dot"></div>
+                            <div>
+                                <h3 style="font-size:0.875rem;font-weight:700;color:var(--text-primary);">Team Chat</h3>
+                                <p style="font-size:0.7rem;color:var(--text-muted);"><span id="online-count">0</span> online</p>
+                            </div>
+                            <button id="chat-toggle" style="margin-left:auto;background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;border-radius:6px;transition:all 0.15s;" aria-label="Toggle chat">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div id="chat-messages" aria-label="Chat messages" aria-live="polite"></div>
+
+                        <div class="chat-input-area">
+                            <form id="chat-form" style="display:flex;gap:0.5rem;width:100%;">
+                                <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+                                <button type="submit" style="background:var(--grad-primary);border:none;border-radius:var(--radius-sm);padding:0 0.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-normal);flex-shrink:0;">
+                                    <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- New Task Modal -->
+    <div id="new-task-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="new-task-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="new-task-title">Create New Task</h2>
+                <span class="close-btn task-close" role="button" aria-label="Close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="new-task-form" novalidate>
+                    <div class="form-group">
+                        <label for="task-title">Task Title</label>
+                        <input type="text" id="task-title" required placeholder="e.g. Design landing page">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-description">Description</label>
+                        <textarea id="task-description" rows="3" placeholder="Optional description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-assignees">Assign To</label>
+                        <select id="task-assignees" multiple required></select>
+                        <small style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;display:block;">Hold Ctrl/Cmd to select multiple.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-due-date">Due Date</label>
+                        <input type="date" id="task-due-date">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Create Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="add-member-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="add-member-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="add-member-title">Add Team Member</h2>
+                <span class="close-btn member-close" role="button" aria-label="Close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="add-member-form" novalidate>
+                    <div class="form-group">
+                        <label for="member-username">Username</label>
+                        <input type="text" id="member-username" placeholder="Enter exact username" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Add Member</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts/app.js" defer></script>
+    <script src="./scripts/chat.js" defer></script>
+    <script src="./scripts/project-details.js" defer></script>
+</body>
+
+</html>
